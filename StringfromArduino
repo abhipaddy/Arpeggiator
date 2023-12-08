@@ -1,0 +1,122 @@
+//We essentially want to achieve some trigger(digital) inputs and some analog inputs from our Arduino microcontroller so that it can be unpacked by Max/MSP to control our sequencer. We use four buttons that are described as follows:
+//•	Trigger Sequencer (digital input button)
+//•	Step Up Fifth (digital input button)
+//•	Step Down Fourth (digital input button)
+//•	Minor Chord On (digital Input button)
+
+//We use two more analog inputs:
+
+//•	Tempo. (Change through 200ms in between notes through to 80ms between notes)
+//•	Gate. (Block a counter in the sequencer, omitting that note, and creating rhythmic variation. The greater the number, the greater the number of counts blocked.)
+
+
+//The Arduino hence sends out a string of numbers in this format:
+//Trigger | StepUp | StepDown | MinorCh | Tempo | Sensor Value
+//An example of this would be:
+//1 0 0 1 150 560
+//Note that in the above string of values, Tempo is mapped to a range from 200 to 80 in a decrementing fashion. This provides a good range of time between notes. The regular analog output ranging from 0-1023 from Arduino is too large a range for tempo control.
+//This string is unpacked by the Max/MSP sequencer.
+
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(2, INPUT_PULLUP); //StepUpFifth Input
+  pinMode(3, INPUT_PULLUP); //StepDownFourth Input
+  pinMode(4, INPUT_PULLUP); //Minor Chord On Input
+  pinMode(5, INPUT_PULLUP); //Sequencer Trigger
+
+}
+  int StepUpFifth; //When button attached to 2 is pushed down, this value will be 1.
+  int StepDownFourth; //When button attached to pin 3 is pushed down, this vallue will be 1.
+  int minorCh=0; //When button attached to pin 4 is pushed down, this value will be 1.
+
+  //bs4 and lbs4 stand for button state 4 and last button state 4 respectively. These are used so that the variable controlled by button 4 is changed once per trigger.
+  int bs4=0;
+  int lbs4=0;
+  int cs4=0;
+
+  //bs5 and lbs5 stand for button state 5 and last button state 5 respectively. These are used so that the variable controlled by button 5 is changed once per trigger.
+  int bs5=0;
+  int lbs5=0;
+  int cs5=0;
+
+  int startArp=0;   //variable that triggers the sequencer in Max
+
+  int timeBetweenNotes; //analog values mapped between 200 to 80 to change tempo in our max sequencer
+  int lightsensVal; //analog values to check how close the hand(light surrounding the light sensor) is to the light sensor
+
+void loop() {
+
+  bs4=digitalRead(4);
+  bs5=digitalRead(5);
+
+  timeBetweenNotes=analogRead(A0);
+  timeBetweenNotes = map(timeBetweenNotes, 0 , 1023, 200, 80);
+
+  lightsensVal = analogRead(A1);
+  lightsensVal = map(lightsensVal, 0, 1032, 80, 500);
+
+  static uint32_t pushTime; //we use Pushtime for StepDownFourth and StepUpFifth so that it limits the amount of 'HIGH's it sends out through serial communication
+
+  if(digitalRead(2)==LOW && (millis() - pushTime) >500){ //we check for how long the button is pressed
+    pushTime = millis(); 
+      StepUpFifth = 1;
+  }
+  else{
+      StepUpFifth = 0;
+  }
+    
+  if(digitalRead(3)==LOW && (millis() - pushTime) >500){
+    pushTime=millis();
+    StepDownFourth = 1;
+  }
+  else{
+    StepDownFourth = 0;
+  }
+    
+
+  if(lbs4==1 && bs4==0){
+    if(cs4==0){
+      minorCh=1;
+      cs4=1;
+    }
+    else{
+    minorCh=0;
+    cs4=0;
+    }
+    
+  }
+
+  if(lbs5==1 && bs5==0){
+    if(cs5==0){
+      startArp=1;
+      cs5=1;
+    }
+    else{
+    startArp=0;
+    cs5=0;
+    }
+    
+  }
+ 
+  lbs4=bs4;
+  lbs5=bs5;
+
+  //The sequence of the string is printed out below to be sent and unpacked by Max.
+
+  Serial.print(StepUpFifth); 
+  Serial.print(" "); 
+  Serial.print(StepDownFourth); 
+  Serial.print(" "); 
+  Serial.print(minorCh); 
+  Serial.print(" "); 
+  Serial.print(startArp); 
+  Serial.print(" ");
+  Serial.print(timeBetweenNotes); 
+  Serial.print(" "); 
+  Serial.print(lightsensVal);
+  Serial.println();
+}
+
+
+
