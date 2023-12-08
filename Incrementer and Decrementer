@@ -1,0 +1,52 @@
+//This is the logic that increments or decrements our arpeggios. We store them as arrays to increment and decrement and on the push of a button, we change the pitch. This goes onto the 'arp.js' node in the Max Patcher
+//We start out with hard coded arrays for C major 7 and C minor 7
+var myArray = new Array(60,64,67,59)
+var myMinArray = new Array(60, 63, 67, 58)
+
+
+function getnotes(majArray, minArray, minorCh, stepUpFifth, stepDownFourth){
+		majArray = myArray
+		minArray = myMinArray
+		var tempMajArray = majArray
+		var tempMinArray = minArray
+		
+		//we are using 2.4 because arduino sends multiple messages at once.
+		//instead of moving the values by 7 once, it did it 3 times.
+		//hence, the increment value was changed to 2.4 which will increase by 7 instead of 21
+		//these values are floored by Max
+		if(stepUpFifth==1){
+				tempMajArray[0] += 2.4
+				tempMajArray[1] += 2.4
+				tempMajArray[2] += 2.4
+				tempMajArray[3] += 2.4
+				tempMinArray[0] += 2.4
+				tempMinArray[1] += 2.4
+				tempMinArray[2] += 2.4
+				tempMinArray[3] += 2.4
+				
+			}
+		if(stepDownFourth==1){
+				tempMajArray[0] -= 2.4
+				tempMajArray[1] -= 2.4
+				tempMajArray[2] -= 2.4
+				tempMajArray[3] -= 2.4
+				tempMinArray[0] -= 2.4
+				tempMinArray[1] -= 2.4
+				tempMinArray[2] -= 2.4
+				tempMinArray[3] -= 2.4
+			}
+		
+		/* Since we are simultaneously updating both minor and major arrays,
+		we simply have to check if the minor Chord trigger is on and pass that 
+		array instead of the major chord array.
+		*/	
+		
+		if(minorCh==1){
+		outlet(0, tempMinArray)
+		}
+		else if(minorCh==0){
+		outlet(0, tempMajArray)
+		}
+		
+		
+	}
