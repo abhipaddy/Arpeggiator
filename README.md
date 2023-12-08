@@ -1,4 +1,5 @@
 # Arpeggiator
 A tangible musical accompaniment tool.
+Demo: https://www.youtube.com/watch?v=jHPraIAwdDA
 
 Many tangible music interfaces exist that allow a user to experimentally and creatively use a tangible interface to produce music. The idea in this paper is to draw inspiration from such musical interfaces and build something scalable and usable in a context that encompasses performances and practice on a more day-to-day basis such as guitar practice at home and having something to accompany the practice, instead of an interface built as an experimental interface for artwork. This can include an interface that allows a user to output rhythms, harmonies and melodies while following well-known western music theory guidelines, such as following a time signature in 4/4, and following chord progression forms like movements up a perfect fifth and down a perfect fourth. The prototype will include controls that are simple to use to trigger these changes, such as buttons for arpeggios, knobs for tempo, and sensors to change rhythms.
